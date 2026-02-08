@@ -1,3 +1,4 @@
+import React from "react";
 import StatCards from "../components/StatCards";
 
 const About = () => {
