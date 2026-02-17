@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { mockDonations } from "../data/mockDonations";
 import ItemCard from "./ItemCard";
 import { FiAlertTriangle } from "react-icons/fi";
+import { FaBoxOpen } from "react-icons/fa";
+
 const ItemList = () => {
   const [donations, setDonations] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -15,7 +17,7 @@ const ItemList = () => {
     search: "",
   });
 
- useEffect(() => {
+  useEffect(() => {
     const fetchDonations = async () => {
       try {
         setLoading(true);
@@ -71,6 +73,7 @@ const ItemList = () => {
 
     fetchDonations();
   }, [filters]);
+
   if (error) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -99,17 +102,8 @@ const ItemList = () => {
     <>
       <Filter filters={filters} setFilters={setFilters} />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
-        {loading
-          ? Array.from({ length: 6 }).map((_, index) => (
-              <SkeletonCard key={index} />
-            ))
-          : donations.map((donation) => (
-              <ItemCard key={donation.id} {...donation} />
-            ))}
-      </div>
-
-      {!loading && donations.length === 0 && (
+      {!loading && donations.length === 0 ? (
+        // Empty state when no results
         <div className="text-center py-16 px-4">
           <FaBoxOpen className="mx-auto text-6xl text-gray-300 mb-4" />
           <h3 className="text-xl font-semibold text-gray-700 mb-2">
@@ -124,6 +118,16 @@ const ItemList = () => {
           >
             Clear Filters
           </button>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
+          {loading
+            ? Array.from({ length: 6 }).map((_, index) => (
+                <SkeletonCard key={index} />
+              ))
+            : donations.map((donation) => (
+                <ItemCard key={donation.id} {...donation} />
+              ))}
         </div>
       )}
     </>
