@@ -15,29 +15,62 @@ const ItemList = () => {
     search: "",
   });
 
-useEffect(() => {
-  const fetchDonations = async () => {
-    try {
-    setLoading(true);
-    const response = await fetch('http://localhost:3000/api/donations');
-   
-    if (!response.ok) {
-      throw new Error('Server responded with an error');
-    }
-    const data = await response.json();
-    setDonations(data.length>0 ? data : mockDonations);
-    setError(null);
+ useEffect(() => {
+    const fetchDonations = async () => {
+      try {
+        setLoading(true);
+        
+        let allDonations = [];
+        try {
+          const response = await fetch('http://localhost:3000/api/donations');
+          if (response.ok) {
+            const data = await response.json();
+            allDonations = data.length > 0 ? data : mockDonations;
+          } else {
+            allDonations = mockDonations;
+          }
+        } catch (fetchError) {
+          console.warn("Backend unavailable, using mock data", fetchError);
+          allDonations = mockDonations;
+        }
 
-  } catch (error) {
-    console.warn("Backend unavailable or returned HTML. falling back to mock data", error);
-    setDonations(mockDonations);
-    setError(null); 
-  } finally {
-    setLoading(false);
-  }
-  };
-  fetchDonations();
-}, []); 
+        let filtered = [...allDonations];
+
+        if (filters.category) {
+          filtered = filtered.filter(item => item.category === filters.category);
+        }
+
+        if (filters.condition) {
+          filtered = filtered.filter(item => item.condition === filters.condition);
+        }
+
+        if (filters.location) {
+          filtered = filtered.filter(item => 
+            item.location.toLowerCase().includes(filters.location.toLowerCase())
+          );
+        }
+
+        if (filters.search) {
+          const searchLower = filters.search.toLowerCase();
+          filtered = filtered.filter(item => 
+            item.title.toLowerCase().includes(searchLower) ||
+            item.description.toLowerCase().includes(searchLower)
+          );
+        }
+
+        setDonations(filtered);
+        setError(null);
+
+      } catch (error) {
+        console.error("Error processing donations:", error);
+        setError(error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDonations();
+  }, [filters]);
   if (error) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
