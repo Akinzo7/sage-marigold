@@ -1,7 +1,7 @@
 import SkeletonCard from "./SkeletonCard";
 import Filter from "./Filter"; 
 import { useEffect, useState } from "react";
-// import { mockDonations } from "../data/mockDonations";
+import { mockDonations } from "../data/mockDonations";
 import ItemCard from "./ItemCard";
 import { FiAlertTriangle } from "react-icons/fi";
 const ItemList = () => {
@@ -18,24 +18,23 @@ const ItemList = () => {
 useEffect(() => {
   const fetchDonations = async () => {
     try {
-      setLoading(true);
-      
-      const response = await fetch('http://localhost:3000/api/donations');
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      
-      const data = await response.json();
-      
-      setDonations(data);
-      setError(null);
-    } catch (error) {
-      console.error("Error fetching items:", error);
-      setError(error);
-    } finally {
-      setLoading(false);
+    setLoading(true);
+    const response = await fetch('http://localhost:3000/api/donations');
+   
+    if (!response.ok) {
+      throw new Error('Server responded with an error');
     }
+    const data = await response.json();
+    setDonations(data.length>0 ? data : mockDonations);
+    setError(null);
+
+  } catch (error) {
+    console.warn("Backend unavailable or returned HTML. falling back to mock data", error);
+    setDonations(mockDonations);
+    setError(null); 
+  } finally {
+    setLoading(false);
+  }
   };
   fetchDonations();
 }, []); 
